@@ -7,7 +7,7 @@ import cors from "cors"
 app.use(cors({
    origin: [
       "http://localhost:5173",
-      "https://frontend-hackathon-ashen.vercel.app/",
+      "https://frontend-hackathon-ashen.vercel.app",
     ],
     credentials:true
 }))
