@@ -5,7 +5,7 @@ export const authenticate = (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
 
-        if (!authHeader || !authHeader.startsWith("Bearer ")) {
+        if (!authHeader || !authHeader.startsWith("Bearer")) {
             return res.status(401).json({
                 message: "Access token required"
             });
@@ -25,4 +25,27 @@ export const authenticate = (req, res, next) => {
             message: "Invalid or expired access token"
         });
     }
+};
+
+    export const requireAdmin = (req, res, next) => {
+        if (req.user?.role !== "admin") {
+            return res.status(403).json({
+                message: "Admin access required"
+            });
+        }
+
+        next();
+    };
+
+    export const requireAgent = (req, res, next) => {
+    if (
+        req.user?.role !== "agent" &&
+        req.user?.role !== "admin"
+    ) {
+        return res.status(403).json({
+            message: "Agent access required"
+        });
+    }
+
+    next();
 };

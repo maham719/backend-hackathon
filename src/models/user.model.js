@@ -5,7 +5,8 @@ const userSchema=new Schema({
         required:[true,"username is required"],
         unique:[true,"username must be unique"]
     },
-    role:{type:String,default:"user", enum:["user","admin"]},
+    role:{type:String,default:"user", enum:["user","agent","admin"]},
+    category:{type:String,enum:["technical","billing","account","general"],default:null},
     email:{
         type:String,
         required:[true,"email is required"],
@@ -18,8 +19,12 @@ const userSchema=new Schema({
     verified:{
         type:Boolean,
         default:false
+    },
+     active: {
+        type: Boolean,
+        default: true
     }
-})
+}, { timestamps: true })
 
 const userModel=mongoose.model("users",userSchema)
 
