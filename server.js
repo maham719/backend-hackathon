@@ -18,8 +18,8 @@ const io = new Server(server, {
     cors: {
         origin: [
             "http://localhost:5173",
-            "https://frontend-hackathon-ashen.vercel.app/",
-            " https://backend-hackathon-1dgv.onrender.com"
+            "https://frontend-hackathon-ashen.vercel.app",
+           
         ],
         credentials: true
     }
