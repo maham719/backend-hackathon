@@ -461,3 +461,95 @@ export const getAnalytics = async (req, res) => {
         });
     }
 };
+
+
+export const getCustomers = async (req, res) => {
+    try {
+        const customers = await User.find({ role: "user" })
+            .select("username email createdAt")
+            .sort({ createdAt: -1 })
+            .lean();
+
+        const customerRows = await Promise.all(
+            customers.map(async (customer) => {
+                const [totalTickets, openTickets, resolvedTickets] =
+                    await Promise.all([
+                        Ticket.countDocuments({
+                            customer: customer._id
+                        }),
+
+                        Ticket.countDocuments({
+                            customer: customer._id,
+                            status: {
+                                $in: ["open", "in_progress"]
+                            }
+                        }),
+
+                        Ticket.countDocuments({
+                            customer: customer._id,
+                            status: "resolved"
+                        })
+                    ]);
+
+                return {
+                    ...customer,
+                    totalTickets,
+                    openTickets,
+                    resolvedTickets
+                };
+            })
+        );
+
+        return res.status(200).json({
+            success: true,
+            customers: customerRows
+        });
+
+    } catch (error) {
+        console.error("Get Customers Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch customers."
+        });
+    }
+};
+
+
+export const getCustomerById = async (req, res) => {
+    try {
+        const customer = await User.findOne({
+            _id: req.params.customerId,
+            role: "user"
+        })
+            .select("username email createdAt")
+            .lean();
+
+        if (!customer) {
+            return res.status(404).json({
+                message: "Customer not found."
+            });
+        }
+
+        const tickets = await Ticket.find({
+            customer: customer._id
+        })
+            .select("subject category priority status createdAt")
+            .sort({ createdAt: -1 })
+            .lean();
+
+        return res.status(200).json({
+            success: true,
+            customer,
+            tickets
+        });
+
+    } catch (error) {
+        console.error("Get Customer Error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch customer."
+        });
+    }
+};

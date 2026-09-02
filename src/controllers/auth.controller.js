@@ -312,7 +312,8 @@ export const login=async(req,res)=>{
     const accessToken=jwt.sign({
         id:user._id,
         sessionID:session._id,
-        role:user.role
+        role:user.role,
+        category:user.category
     },config.JWT_SECRET,{expiresIn:"15m"})
 
     res.cookie("refreshtoken",refreshToken,{
@@ -327,7 +328,8 @@ sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
         user:{
             username:user.username,
             email:user.email,
-             role:user.role
+             role:user.role,
+             category:user.category
         },
         accessToken
     })
@@ -350,7 +352,8 @@ export const getMe=async(req,res)=>{
     user:{
         username:user.username,
         emali:user.email,
-        role:user.role
+        role:user.role,
+        category:user.category
     }
    })
 }
@@ -421,7 +424,8 @@ sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
 res.status(200).json({
     message:"access token refreshed successfuly",
     accessToken,
-    role:user.role
+    role:user.role,
+    category:user.category
 })
 }
 
