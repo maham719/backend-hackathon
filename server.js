@@ -8,7 +8,7 @@ import Ticket from "./src/models/ticket.model.js"
 import Message from "./src/models/message.model.js"
 connectToDB()
 
-const PORT = 3006;
+const PORT = const PORT = process.env.PORT||3006;
 
 // Create HTTP server using Express app
 const server = http.createServer(app);
