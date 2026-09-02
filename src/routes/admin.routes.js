@@ -6,9 +6,10 @@ import {
     getAnalytics,
     updateAgentStatus,
     getCustomers,
-    getCustomerById
+    getCustomerById,
+     getSettings,
+    updateSettings
 } from "../controllers/admin.controller.js";
-
 import {
     authenticate,
     requireAdmin
@@ -52,4 +53,17 @@ adminRouter.get(
     getCustomerById
 );
 
+adminRouter.get(
+    "/settings",
+    authenticate,
+    requireAdmin,
+    getSettings
+);
+
+adminRouter.put(
+    "/settings",
+    authenticate,
+    requireAdmin,
+    updateSettings
+);
 export default adminRouter;

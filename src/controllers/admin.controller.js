@@ -1,6 +1,10 @@
 import User from "../models/user.model.js";
 import crypto from "crypto";
 import Ticket from "../models/ticket.model.js";
+import {
+    getSettingsService,
+    updateSettingsService
+} from "../services/admin.service.js";
 // CREATE AGENT
 export const createAgent = async (req, res) => {
     try {
@@ -550,6 +554,45 @@ export const getCustomerById = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Failed to fetch customer."
+        });
+    }
+};
+
+export const getSettings = async (req, res) => {
+    try {
+        const settings = await getSettingsService();
+
+        return res.status(200).json({
+            success: true,
+            settings
+        });
+
+    } catch (error) {
+        console.error("Get settings error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to fetch settings"
+        });
+    }
+};
+
+export const updateSettings = async (req, res) => {
+    try {
+        const settings = await updateSettingsService(req.body);
+
+        return res.status(200).json({
+            success: true,
+            message: "Settings updated successfully",
+            settings
+        });
+
+    } catch (error) {
+        console.error("Update settings error:", error);
+
+        return res.status(500).json({
+            success: false,
+            message: "Failed to update settings"
         });
     }
 };
