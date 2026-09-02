@@ -12,7 +12,7 @@ app.use(cors({
    origin: [
       "http://localhost:5173",
       "https://frontend-hackathon-ashen.vercel.app",
-      "https://frontend-hackathon-pp7kl1wnl-mahams-projects-2fa71fb6.vercel.app/
+      "https://frontend-hackathon-pp7kl1wnl-mahams-projects-2fa71fb6.vercel.app/"
     ],
     credentials:true
 }))
