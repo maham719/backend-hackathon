@@ -1,5 +1,12 @@
 # SupportFlow
 
+# Admincredentials:
+email:syedamahamamjad@gmail.com
+password:12345678
+
+# AgentCredentials:
+email:test@gmail.com
+password:12345678
 > AI-assisted customer support ticket management for faster triage, clearer ownership, and human-led resolution.
 
 SupportFlow is a hackathon-built customer support application. Customers submit tickets and track their progress, while support agents review AI-generated triage suggestions, communicate with customers, and resolve assigned tickets. Administrators supervise agents, tickets, settings, activity, and dashboard analytics.
