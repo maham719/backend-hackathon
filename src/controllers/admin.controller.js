@@ -3,7 +3,9 @@ import crypto from "crypto";
 import Ticket from "../models/ticket.model.js";
 import {
     getSettingsService,
-    updateSettingsService
+    updateSettingsService,
+     deleteTicketService,
+    deleteAgentService
 } from "../services/admin.service.js";
 // CREATE AGENT
 export const createAgent = async (req, res) => {
@@ -593,6 +595,49 @@ export const updateSettings = async (req, res) => {
         return res.status(500).json({
             success: false,
             message: "Failed to update settings"
+        });
+    }
+};
+
+export const deleteTicket = async (req, res) => {
+    try {
+        const { ticketId } = req.params;
+
+        await deleteTicketService(ticketId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Ticket deleted successfully"
+        });
+
+    } catch (error) {
+        console.error("Delete ticket error:", error);
+
+        return res.status(404).json({
+            success: false,
+            message: error.message
+        });
+    }
+};
+
+
+export const deleteAgent = async (req, res) => {
+    try {
+        const { agentId } = req.params;
+
+        await deleteAgentService(agentId);
+
+        return res.status(200).json({
+            success: true,
+            message: "Agent deleted successfully"
+        });
+
+    } catch (error) {
+        console.error("Delete agent error:", error);
+
+        return res.status(404).json({
+            success: false,
+            message: error.message
         });
     }
 };

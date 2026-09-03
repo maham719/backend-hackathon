@@ -8,7 +8,9 @@ import {
     getCustomers,
     getCustomerById,
      getSettings,
-    updateSettings
+    updateSettings,
+    deleteTicket,
+    deleteAgent
 } from "../controllers/admin.controller.js";
 import {
     authenticate,
@@ -65,5 +67,19 @@ adminRouter.put(
     authenticate,
     requireAdmin,
     updateSettings
+);
+
+adminRouter.delete(
+    "/tickets/:ticketId",
+    authenticate,
+    requireAdmin,
+    deleteTicket
+);
+
+adminRouter.delete(
+    "/agents/:agentId",
+    authenticate,
+    requireAdmin,
+    deleteAgent
 );
 export default adminRouter;

@@ -11,132 +11,132 @@ import Settings from "../models/settings.model.js"
 import PendingRegistration from "../models/pendingRegistration.model.js";
 
 
-export const getSettings = async (req, res) => {
-    try {
-        const settings = await Settings.findOneAndUpdate(
-            { key: "supportflow" },
-            { $setOnInsert: { key: "supportflow" } },
-            { new: true, upsert: true, setDefaultsOnInsert: true }
-        ).lean();
+// export const getSettings = async (req, res) => {
+//     try {
+//         const settings = await Settings.findOneAndUpdate(
+//             { key: "supportflow" },
+//             { $setOnInsert: { key: "supportflow" } },
+//             { new: true, upsert: true, setDefaultsOnInsert: true }
+//         ).lean();
 
-        return res.status(200).json({ success: true, settings });
-    } catch (error) {
-        console.error("Get Settings Error:", error);
-        return res.status(500).json({ success: false, message: "Failed to fetch settings." });
-    }
-};
+//         return res.status(200).json({ success: true, settings });
+//     } catch (error) {
+//         console.error("Get Settings Error:", error);
+//         return res.status(500).json({ success: false, message: "Failed to fetch settings." });
+//     }
+// };
 
-export const updateSettings = async (req, res) => {
-    try {
-        const allowedFields = [
-            "supportDeskName",
-            "defaultTicketPriority",
-            "defaultTicketStatus",
-            "aiTriageEnabled",
-            "ticketNotificationsEnabled"
-        ];
-        const updates = Object.fromEntries(
-            allowedFields.filter((field) => req.body[field] !== undefined).map((field) => [field, req.body[field]])
-        );
+// export const updateSettings = async (req, res) => {
+//     try {
+//         const allowedFields = [
+//             "supportDeskName",
+//             "defaultTicketPriority",
+//             "defaultTicketStatus",
+//             "aiTriageEnabled",
+//             "ticketNotificationsEnabled"
+//         ];
+//         const updates = Object.fromEntries(
+//             allowedFields.filter((field) => req.body[field] !== undefined).map((field) => [field, req.body[field]])
+//         );
 
-        const settings = await Settings.findOneAndUpdate(
-            { key: "supportflow" },
-            { $set: updates },
-            { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true }
-        ).lean();
+//         const settings = await Settings.findOneAndUpdate(
+//             { key: "supportflow" },
+//             { $set: updates },
+//             { new: true, upsert: true, setDefaultsOnInsert: true, runValidators: true }
+//         ).lean();
 
-        return res.status(200).json({ success: true, settings });
-    } catch (error) {
-        console.error("Update Settings Error:", error);
-        return res.status(400).json({ success: false, message: error.message || "Failed to save settings." });
-    }
-};
+//         return res.status(200).json({ success: true, settings });
+//     } catch (error) {
+//         console.error("Update Settings Error:", error);
+//         return res.status(400).json({ success: false, message: error.message || "Failed to save settings." });
+//     }
+// };
 
-export const getCustomers = async (req, res) => {
-    try {
-        const customers = await userModel.find({ role: "user" })
-            .select("username email createdAt")
-            .sort({ createdAt: -1 })
-            .lean();
+// export const getCustomers = async (req, res) => {
+//     try {
+//         const customers = await userModel.find({ role: "user" })
+//             .select("username email createdAt")
+//             .sort({ createdAt: -1 })
+//             .lean();
 
-        const customerRows = await Promise.all(customers.map(async (customer) => {
-            const [totalTickets, openTickets, resolvedTickets] = await Promise.all([
-                Ticket.countDocuments({ customer: customer._id }),
-                Ticket.countDocuments({ customer: customer._id, status: { $in: ["open", "in_progress"] } }),
-                Ticket.countDocuments({ customer: customer._id, status: "resolved" })
-            ]);
+//         const customerRows = await Promise.all(customers.map(async (customer) => {
+//             const [totalTickets, openTickets, resolvedTickets] = await Promise.all([
+//                 Ticket.countDocuments({ customer: customer._id }),
+//                 Ticket.countDocuments({ customer: customer._id, status: { $in: ["open", "in_progress"] } }),
+//                 Ticket.countDocuments({ customer: customer._id, status: "resolved" })
+//             ]);
 
-            return { ...customer, totalTickets, openTickets, resolvedTickets };
-        }));
+//             return { ...customer, totalTickets, openTickets, resolvedTickets };
+//         }));
 
-        return res.status(200).json({ success: true, customers: customerRows });
-    } catch (error) {
-        console.error("Get Customers Error:", error);
-        return res.status(500).json({ success: false, message: "Failed to fetch customers." });
-    }
-};
+//         return res.status(200).json({ success: true, customers: customerRows });
+//     } catch (error) {
+//         console.error("Get Customers Error:", error);
+//         return res.status(500).json({ success: false, message: "Failed to fetch customers." });
+//     }
+// };
 
-export const getCustomerById = async (req, res) => {
-    try {
-        const customer = await userModel.findOne({ _id: req.params.customerId, role: "user" })
-            .select("username email createdAt")
-            .lean();
+// export const getCustomerById = async (req, res) => {
+//     try {
+//         const customer = await userModel.findOne({ _id: req.params.customerId, role: "user" })
+//             .select("username email createdAt")
+//             .lean();
 
-        if (!customer) return res.status(404).json({ message: "Customer not found." });
+//         if (!customer) return res.status(404).json({ message: "Customer not found." });
 
-        const tickets = await Ticket.find({ customer: customer._id })
-            .select("subject category priority status createdAt")
-            .sort({ createdAt: -1 })
-            .lean();
+//         const tickets = await Ticket.find({ customer: customer._id })
+//             .select("subject category priority status createdAt")
+//             .sort({ createdAt: -1 })
+//             .lean();
 
-        return res.status(200).json({ success: true, customer, tickets });
-    } catch (error) {
-        console.error("Get Customer Error:", error);
-        return res.status(500).json({ success: false, message: "Failed to fetch customer." });
-    }
-};
+//         return res.status(200).json({ success: true, customer, tickets });
+//     } catch (error) {
+//         console.error("Get Customer Error:", error);
+//         return res.status(500).json({ success: false, message: "Failed to fetch customer." });
+//     }
+// };
 
-export const getAgents = async (req, res) => {
-    try {
-        const agents = await userModel.find({ role: "agent" }).select("username email active category").sort({ username: 1 }).lean();
-        const agentRows = await Promise.all(agents.map(async (agent) => ({
-            ...agent,
-            assignedTickets: await Ticket.countDocuments({ assignedAgent: agent._id }),
-            inProgress: await Ticket.countDocuments({ assignedAgent: agent._id, status: "in_progress" }),
-            resolved: await Ticket.countDocuments({ assignedAgent: agent._id, status: "resolved" })
-        })));
-        return res.status(200).json({ success: true, agents: agentRows });
-    } catch (error) {
-        console.error("Get Agents Error:", error);
-        return res.status(500).json({ success: false, message: "Failed to fetch agents." });
-    }
-};
+// export const getAgents = async (req, res) => {
+//     try {
+//         const agents = await userModel.find({ role: "agent" }).select("username email active category").sort({ username: 1 }).lean();
+//         const agentRows = await Promise.all(agents.map(async (agent) => ({
+//             ...agent,
+//             assignedTickets: await Ticket.countDocuments({ assignedAgent: agent._id }),
+//             inProgress: await Ticket.countDocuments({ assignedAgent: agent._id, status: "in_progress" }),
+//             resolved: await Ticket.countDocuments({ assignedAgent: agent._id, status: "resolved" })
+//         })));
+//         return res.status(200).json({ success: true, agents: agentRows });
+//     } catch (error) {
+//         console.error("Get Agents Error:", error);
+//         return res.status(500).json({ success: false, message: "Failed to fetch agents." });
+//     }
+// };
 
-export const createAgent = async (req, res) => {
-    try {
-        const { username, email, password, category } = req.body;
-        if (!username || !email || !password || !category) return res.status(400).json({ message: "Name, email, password, and category are required." });
-        if (!["technical", "billing", "account", "general"].includes(category)) return res.status(400).json({ message: "Invalid agent category." });
-        const existingUser = await userModel.findOne({ $or: [{ username }, { email }] });
-        if (existingUser) return res.status(409).json({ message: "Username or email already exists." });
-        const agent = await userModel.create({ username, email, category, password: crypto.createHash("sha256").update(password).digest("hex"), role: "agent", verified: true, active: true });
-        return res.status(201).json({ success: true, agent: { _id: agent._id, username: agent.username, email: agent.email, category: agent.category, active: agent.active, assignedTickets: 0, inProgress: 0, resolved: 0 } });
-    } catch (error) {
-        console.error("Create Agent Error:", error);
-        return res.status(500).json({ success: false, message: "Failed to create agent." });
-    }
-};
+// export const createAgent = async (req, res) => {
+//     try {
+//         const { username, email, password, category } = req.body;
+//         if (!username || !email || !password || !category) return res.status(400).json({ message: "Name, email, password, and category are required." });
+//         if (!["technical", "billing", "account", "general"].includes(category)) return res.status(400).json({ message: "Invalid agent category." });
+//         const existingUser = await userModel.findOne({ $or: [{ username }, { email }] });
+//         if (existingUser) return res.status(409).json({ message: "Username or email already exists." });
+//         const agent = await userModel.create({ username, email, category, password: crypto.createHash("sha256").update(password).digest("hex"), role: "agent", verified: true, active: true });
+//         return res.status(201).json({ success: true, agent: { _id: agent._id, username: agent.username, email: agent.email, category: agent.category, active: agent.active, assignedTickets: 0, inProgress: 0, resolved: 0 } });
+//     } catch (error) {
+//         console.error("Create Agent Error:", error);
+//         return res.status(500).json({ success: false, message: "Failed to create agent." });
+//     }
+// };
 
-export const updateAgentStatus = async (req, res) => {
-    try {
-        const agent = await userModel.findOneAndUpdate({ _id: req.params.agentId, role: "agent" }, { active: req.body.active }, { new: true }).select("username email active");
-        if (!agent) return res.status(404).json({ message: "Agent not found." });
-        return res.status(200).json({ success: true, agent });
-    } catch (error) {
-        console.error("Update Agent Status Error:", error);
-        return res.status(500).json({ success: false, message: "Failed to update agent status." });
-    }
-};
+// export const updateAgentStatus = async (req, res) => {
+//     try {
+//         const agent = await userModel.findOneAndUpdate({ _id: req.params.agentId, role: "agent" }, { active: req.body.active }, { new: true }).select("username email active ");
+//         if (!agent) return res.status(404).json({ message: "Agent not found." });
+//         return res.status(200).json({ success: true, agent });
+//     } catch (error) {
+//         console.error("Update Agent Status Error:", error);
+//         return res.status(500).json({ success: false, message: "Failed to update agent status." });
+//     }
+// };
 
 
 export const register = async (req, res) => {
