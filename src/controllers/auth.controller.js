@@ -9,6 +9,7 @@ import otpModel from "../models/otp.model.js"
 import Ticket from "../models/ticket.model.js"
 import Settings from "../models/settings.model.js"
 import PendingRegistration from "../models/pendingRegistration.model.js";
+import { verifyEmailDeliverability } from "../services/emailverification.service.js"
 
 
 // export const getSettings = async (req, res) => {
@@ -186,6 +187,17 @@ export const register = async (req, res) => {
             Date.now() + 10 * 60 * 1000
         );
 
+       
+
+const emailCheck = await verifyEmailDeliverability(email);
+
+if (emailCheck.email_deliverability?.status === "undeliverable") {
+    return res.status(400).json({
+        success: false,
+        code: "EMAIL_UNDELIVERABLE",
+        message: "This email address cannot receive verification emails."
+    });
+}
         await PendingRegistration.create({
             username,
             email,
@@ -210,9 +222,10 @@ export const register = async (req, res) => {
     } catch (error) {
         console.error("Register Error:", error);
 
-        return res.status(500).json({
-            message: "Registration failed"
-        });
+       return res.status(500).json({
+        success: false,
+        message: "We could not send the verification email. Please check your email address and try again."
+    });
     }
 };
 // export const register=async(req,res)=>{
