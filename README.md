@@ -5,8 +5,8 @@ email:syedamahamamjad@gmail.com
 password:12345678
 
 # AgentCredentials:
-email:test@gmail.com
-password:12345678
+email:test@gmail.co
+
 > AI-assisted customer support ticket management for faster triage, clearer ownership, and human-led resolution.
 
 SupportFlow is a hackathon-built customer support application. Customers submit tickets and track their progress, while support agents review AI-generated triage suggestions, communicate with customers, and resolve assigned tickets. Administrators supervise agents, tickets, settings, activity, and dashboard analytics.
@@ -28,27 +28,6 @@ AI is used to reduce the manual work at the start of the support workflow. It an
 - Customer and agent ticket conversations
 - Real-time Socket.IO messages and typing indicators
 - Real-time new-message notifications
-- Ticket resolution with a required resolution note
-- Resolution email notifications
-- Admin agent creation and activation/deactivation
-- Admin ticket management and customer ticket history
-- Dashboard analytics, ticket distributions, agent performance, and recent activities
-- Role-aware frontend routes and backend authorization middleware
-- Dark/light theme support in the frontend
-
-## How It Works
-
-```mermaid
-flowchart LR
-    A[Customer] --> B[Create ticket]
-    B --> C[Gemini AI triage]
-    C --> D[Category, priority, summary, confidence]
-    C --> E[Suggested support agent]
-    D --> F[Human agent review]
-    E --> F
-    F --> G[Customer and agent conversation]
-    G --> H[Agent adds resolution note]
-    H --> I[Ticket resolved]
     I --> J[Resolution email]
 ```
 
@@ -79,10 +58,6 @@ The request uses an application-defined response schema, `responseMimeType: "app
 ### Agent assignment
 
 After triage, the backend finds active agents whose category matches the AI-suggested category. Gemini receives the ticket context and the eligible agent list and returns an `agentId` plus a `reason`. The selected ID must match one of the eligible active agents before it is stored as `aiSuggestedAgent` and used for assignment.
-
-### Human review and error behavior
-
-Agents and administrators with agent-level access can review category, priority, and assigned-agent suggestions through the AI review endpoint. The backend validates the category, priority, and selected active agent before saving the reviewed values.
 
 AI output is parsed as JSON and checked for required fields. If the AI request fails, returns invalid JSON, returns invalid values, or no matching active agent is available, ticket creation fails. The current implementation does not provide a local AI fallback. The persisted `aiTriageEnabled` admin setting is not currently consulted by ticket creation.
 
@@ -187,24 +162,9 @@ completeauth/
 │       ├── controllers/
 │       │   ├── activity.controller.js
 │       │   ├── admin.controller.js
-│       │   ├── auth.controller.js
-│       │   ├── message.controller.js
-│       │   └── ticket.controller.js
-│       ├── middlewares/
-│       │   └── auth.middleware.js
-│       ├── models/
-│       │   ├── activity.model.js
 │       │   ├── message.model.js
 │       │   ├── otp.model.js
 │       │   ├── pendingRegistration.model.js
-│       │   ├── session.model.js
-│       │   ├── settings.model.js
-│       │   ├── ticket.model.js
-│       │   └── user.model.js
-│       ├── routes/
-│       │   ├── activity.routes.js
-│       │   ├── admin.routes.js
-│       │   ├── auth.routes.js
 │       │   └── ticket.routes.js
 │       ├── services/
 │       │   ├── ai.service.js
@@ -239,11 +199,6 @@ completeauth/
 
 - Node.js and npm
 - A running MongoDB database
-- A Google GenAI API key
-- A Gmail account configured for OAuth2 if email delivery is required
-
-The repository does not declare a required Node.js version. Use a current Node.js LTS release.
-
 ### Clone the repository
 
 ```bash
@@ -309,14 +264,6 @@ npm run preview   # Preview the production build locally
 The backend package currently provides `npm run dev` only. Its `npm test` script is the default placeholder and exits with an error; no automated test suite is defined.
 
 ## Environment Variables
-
-### Backend: `backend/.env`
-
-| Variable | Used for |
-|---|---|
-| `MONGO_URI` | MongoDB connection string. |
-| `JWT_SECRET` | Signs and verifies access and refresh JWTs and Socket.IO tokens. |
-| `GOOGLE_GENAI_API_KEY` | Google GenAI client authentication. |
 | `GOOGLE_CLIENT_ID` | Gmail OAuth2 client ID. |
 | `GOOGLE_CLIENT_SECRET` | Gmail OAuth2 client secret. |
 | `GOOGLE_REFRESH_TOKEN` | Gmail OAuth2 refresh token. |
@@ -328,31 +275,12 @@ The backend package currently provides `npm run dev` only. Its `npm test` script
 No frontend environment variables are currently used. API and Socket.IO URLs are defined in source code.
 
 ## API Overview
-
-All endpoints below are prefixed with `/api`. Authentication means a Bearer access token unless otherwise noted. The refresh and logout endpoints use the `refreshtoken` HTTP-only cookie.
-
-### Authentication
-
 | Method | Endpoint | Authentication / role | Purpose |
 |---|---|---|---|
 | POST | `/auth/register` | Public | Start registration and send an OTP. |
-| POST | `/auth/login` | Public | Authenticate a verified, active user; return an access token and set a refresh cookie. |
-| GET | `/auth/get-me` | Bearer JWT | Get the current user. |
-| GET | `/auth/refresh` | Refresh cookie | Rotate the refresh token and issue a new access token. |
-| POST | `/auth/logout` | Refresh cookie | Revoke the current session and clear the cookie. |
-| POST | `/auth/logout-all` | Refresh cookie | Attempt to revoke all sessions for the user. |
-| POST | `/auth/verify-email` | Public | Verify the registration OTP and create the user. |
-| POST | `/auth/resend-otp` | Public | Replace and resend a registration OTP. |
 
 ### Tickets and messages
 
-| Method | Endpoint | Authentication / role | Purpose |
-|---|---|---|---|
-| GET | `/tickets/admin` | Admin | List all tickets. |
-| GET | `/tickets/agent` | Agent or Admin middleware | List tickets assigned to the authenticated user. |
-| POST | `/tickets` | Authenticated user | Create a ticket and run AI triage/assignment. |
-| GET | `/tickets` | Authenticated user | List tickets for the authenticated customer. |
-| GET | `/tickets/:ticketId` | Authenticated; ownership/access checked | Get an authorized ticket. |
 | GET | `/tickets/:ticketId/messages` | Authenticated; customer, assigned agent, or admin | List ticket messages in chronological order. |
 | POST | `/tickets/:ticketId/messages` | Authenticated; customer, assigned agent, or admin | Create a ticket message. |
 | PATCH | `/tickets/:ticketId/ai-review` | Agent or Admin middleware | Review and save AI category, priority, and assigned agent. |
