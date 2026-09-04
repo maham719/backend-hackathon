@@ -187,17 +187,34 @@ export const register = async (req, res) => {
             Date.now() + 10 * 60 * 1000
         );
 
-       
+        const emailCheck = await verifyEmailDeliverability(email);
+        const emailStatus = String(emailCheck?.status || emailCheck?.result || "").toLowerCase();
+        const isFormatValid = [true, "true", 1, "1"].includes(emailCheck?.format_valid);
+        const isSmtpCheckPass = [true, "true", 1, "1"].includes(emailCheck?.smtp_check);
+        const isMxFound = emailCheck?.mx_found !== false && emailCheck?.mx_found !== "false";
+        const isDisposable = [true, "true", 1, "1"].includes(emailCheck?.disposable);
+        const hasNoMail = [true, "true", 1, "1"].includes(emailCheck?.do_not_mail);
+        const isRoleAddress = [true, "true", 1, "1"].includes(emailCheck?.role);
+        const isDeliverableStatus = ["valid", "deliverable", "safe_to_send"].includes(emailStatus);
+        const isUndeliverableStatus = ["invalid", "undeliverable", "unknown", "do_not_mail", "risky"].includes(emailStatus);
 
-const emailCheck = await verifyEmailDeliverability(email);
+        const isEmailDeliverable =
+            emailCheck?.success !== false &&
+            isFormatValid &&
+            isSmtpCheckPass &&
+            isMxFound &&
+            !isDisposable &&
+            !hasNoMail &&
+            !isRoleAddress &&
+            (isDeliverableStatus || (!isUndeliverableStatus && emailCheck?.score !== 0));
 
-if (emailCheck.email_deliverability?.status === "undeliverable") {
-    return res.status(400).json({
-        success: false,
-        code: "EMAIL_UNDELIVERABLE",
-        message: "This email address cannot receive verification emails."
-    });
-}
+        if (!isEmailDeliverable) {
+            return res.status(400).json({
+                success: false,
+                code: "EMAIL_UNDELIVERABLE",
+                message: "This email address cannot receive verification emails."
+            });
+        }
         await PendingRegistration.create({
             username,
             email,

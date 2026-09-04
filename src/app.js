@@ -4,6 +4,7 @@ import cookieParser from "cookie-parser"
 import ticketRouter from "./routes/ticket.routes.js"
 import adminRouter from "./routes/admin.routes.js";
 import activityRoutes from "./routes/activity.routes.js";
+import notificationRouter from "./routes/notification.routes.js";
 const app =express()
 import cors from "cors"
 
@@ -22,4 +23,5 @@ app.use("/api/auth",authRouter)
 app.use("/api/tickets",ticketRouter)
 app.use("/api/admin", adminRouter);
 app.use("/api/activities", activityRoutes);
+app.use("/api/notifications", notificationRouter);
 export default app

@@ -1,5 +1,6 @@
 import Message from "../models/message.model.js";
 import Ticket from "../models/ticket.model.js";
+import { createMessageNotification } from "../services/notification.service.js";
 
 
 // GET messages for a ticket
@@ -122,43 +123,36 @@ export const createMessage = async (req, res) => {
             "sender",
             "username email role"
         );
-const io = req.app.get("io");
+        const io = req.app.get("io");
+        const recipientId = userRole === "agent"
+            ? ticket.customer.toString()
+            : ticket.assignedAgent?.toString();
 
-io.to(`ticket:${ticketId}`).emit(
-    "new-message",
-    message
-);
+        const notification = await createMessageNotification({
+            recipientId,
+            senderId: userId,
+            ticketId,
+            senderRole: userRole,
+        });
 
-const recipientId =
-    userRole === "agent"
-        ? ticket.customer.toString()
-        : ticket.assignedAgent?.toString();
+        if (io) {
+            io.to(`ticket:${ticketId}`).emit("new-message", message);
 
-if (io && recipientId) {
-
-    console.log("NOTIFICATION RECIPIENT:", recipientId);
-
-    io.sockets.sockets.forEach((connectedSocket) => {
-
-        console.log(
-            "CONNECTED SOCKET USER:",
-            connectedSocket.user?.id
-        );
-
-        if (connectedSocket.user?.id === recipientId) {
-            connectedSocket.emit("notification", {
-                type: "new_message",
-                ticketId,
-                title: "New message",
-                message:
-                    userRole === "agent"
-                        ? "Agent sent a new message"
-                        : "Customer sent a new message",
-                senderId: userId
-            });
+            if (notification) {
+                io.sockets.sockets.forEach((connectedSocket) => {
+                    if (connectedSocket.user?.id === recipientId) {
+                        connectedSocket.emit("notification", {
+                            notification,
+                            type: notification.type,
+                            ticketId,
+                            title: notification.title,
+                            message: notification.message,
+                            senderId: userId,
+                        });
+                    }
+                });
+            }
         }
-    });
-}
         return res.status(201).json({
             success: true,
             message: "Message sent successfully.",

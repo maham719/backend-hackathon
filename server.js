@@ -6,6 +6,7 @@ import jwt from "jsonwebtoken";
 import config from "./src/config/config.js"
 import Ticket from "./src/models/ticket.model.js"
 import Message from "./src/models/message.model.js"
+import { createMessageNotification } from "./src/services/notification.service.js";
 connectToDB()
 
  const PORT = process.env.PORT||3006;
@@ -207,27 +208,31 @@ console.log("Full socket user:", socket.user);
             message
         );
 
-        const recipientId =
-    socket.user.role === "agent"
-        ? ticket.customer.toString()
-        : ticket.assignedAgent?.toString();
+        const recipientId = socket.user.role === "agent"
+            ? ticket.customer.toString()
+            : ticket.assignedAgent?.toString();
 
-if (recipientId) {
-    io.sockets.sockets.forEach((connectedSocket) => {
-        if (connectedSocket.user?.id === recipientId) {
-            connectedSocket.emit("notification", {
-                type: "new_message",
-                ticketId,
-                title: "New message",
-                message:
-                    socket.user.role === "agent"
-                        ? "Agent sent a new message"
-                        : "Customer sent a new message",
-                senderId: socket.user.id,
+        const notification = await createMessageNotification({
+            recipientId,
+            senderId: socket.user.id,
+            ticketId,
+            senderRole: socket.user.role,
+        });
+
+        if (notification) {
+            io.sockets.sockets.forEach((connectedSocket) => {
+                if (connectedSocket.user?.id === recipientId) {
+                    connectedSocket.emit("notification", {
+                        notification,
+                        type: notification.type,
+                        ticketId,
+                        title: notification.title,
+                        message: notification.message,
+                        senderId: socket.user.id,
+                    });
+                }
             });
         }
-    });
-}
 
         // Confirm to sender
         callback({
