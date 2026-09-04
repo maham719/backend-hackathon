@@ -151,10 +151,8 @@ export const register = async (req, res) => {
         }
 
         const existingUser = await userModel.findOne({
-            $or: [
-                { username },
-                { email }
-            ]
+                 email 
+            
         });
 
         if (existingUser) {
