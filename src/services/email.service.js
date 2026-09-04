@@ -1,42 +1,30 @@
-import nodemailer from "nodemailer"
-import config from "../config/config.js"
+import { Resend } from "resend";
+import config from "../config/config.js";
 
-const transporter=nodemailer.createTransport({
-    service:'gmail',
-    auth:{
-        type:'OAuth2',
-    user:config.GOOGLE_USER,
-    clientId:config.GOOGLE_CLIENT_ID,
-    clientSecret:config.GOOGLE_CLIENT_SECRET,
-    refreshToken:config.GOOGLE_REFRESH_TOKEN
-    }
-})
-
-transporter.verify((error, success) => {
-  if (error) {
-    console.error('Error connecting to email server:', error);
-  } else {
-    console.log('Email server is ready to send messages');
-  }
-});
-
+const resend = new Resend(config.RESEND_API_KEY);
 
 const sendEmail = async (to, subject, text, html) => {
-  try {
-    const info = await transporter.sendMail({
-      from: `"Your Name" <${config.GOOGLE_USER}>`, // sender address
-      to, // list of receivers
-      subject, // Subject line
-      text, // plain text body
-      html, // html body
-    });
+    try {
+        const { data, error } = await resend.emails.send({
+            from: "SupportFlow <onboarding@resend.dev>",
+            to,
+            subject,
+            text,
+            html,
+        });
 
-    console.log('Message sent: %s', info.messageId);
-    console.log('Preview URL: %s', nodemailer.getTestMessageUrl(info));
-  } catch (error) {
-    console.error("Error sending email:", error);
-    throw error;
-}
+        if (error) {
+            console.error("Resend error:", error);
+            throw new Error(error.message);
+        }
+
+        console.log("Message sent:", data.id);
+
+        return data;
+    } catch (error) {
+        console.error("Error sending email:", error);
+        throw error;
+    }
 };
 
 const sendTicketResolvedEmail = async ({
@@ -54,6 +42,7 @@ Hello ${username},
 Your SupportFlow ticket has been resolved.
 
 Ticket: ${ticketNumber}
+
 Subject: ${subject}
 
 Resolution:
@@ -95,4 +84,8 @@ SupportFlow Team
 
     await sendEmail(to, emailSubject, text, html);
 };
-export { transporter ,sendEmail,sendTicketResolvedEmail}
+
+export {
+    sendEmail,
+    sendTicketResolvedEmail
+};

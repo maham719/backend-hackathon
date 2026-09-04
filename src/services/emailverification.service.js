@@ -13,7 +13,7 @@ const verifyEmailDeliverability = async (email) => {
             "https://apilayer.net/api/check",
             {
                 params: {
-                    access_key: config.EMAIL_VALIDATION_API_KEY,
+                    access_key: config.EMAIL_VERIFICATION_API_KEY,
                     email: trimmedEmail,
                     format: "1",
                     smtp: "1"
