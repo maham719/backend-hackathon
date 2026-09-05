@@ -10,11 +10,17 @@ import {
 // CREATE AGENT
 export const createAgent = async (req, res) => {
     try {
-        const { username, email, password, category } = req.body;
+        const { username, email, password, category, verified = false } = req.body;
 
         if (!username || !email || !password || !category) {
             return res.status(400).json({
                 message: "Username, email, password and category are required"
+            });
+        }
+
+        if (typeof verified !== "boolean") {
+            return res.status(400).json({
+                message: "Verified must be a boolean"
             });
         }
 
@@ -50,6 +56,7 @@ export const createAgent = async (req, res) => {
             password: hashedPassword,
             role: "agent",
             category,
+            verified,
             active: true
         });
 
@@ -59,6 +66,7 @@ export const createAgent = async (req, res) => {
             email: agent.email,
             role: agent.role,
             category: agent.category,
+            verified: agent.verified,
             active: agent.active,
             assignedTickets: 0,
             inProgress: 0,
