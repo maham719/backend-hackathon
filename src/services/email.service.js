@@ -1,28 +1,32 @@
-import { Resend } from "resend";
+import { BrevoClient } from "@getbrevo/brevo";
 import config from "../config/config.js";
 
-const resend = new Resend(config.RESEND_API_KEY);
+const brevo = new BrevoClient({
+    apiKey: config.BREVO_API_KEY,
+});
 
 const sendEmail = async (to, subject, text, html) => {
     try {
-        const { data, error } = await resend.emails.send({
-            from: "SupportFlow <onboarding@resend.dev>",
-            to,
+        const result = await brevo.transactionalEmails.sendTransacEmail({
+            sender: {
+                name: "SupportFlow",
+                email: "zohameer@gmail.com",
+            },
+            to: [
+                {
+                    email: to,
+                },
+            ],
             subject,
-            text,
-            html,
+            textContent: text,
+            htmlContent: html,
         });
 
-        if (error) {
-            console.error("Resend error:", error);
-            throw new Error(error.message);
-        }
+        console.log("Email sent:", result.messageId);
 
-        console.log("Message sent:", data.id);
-
-        return data;
+        return result;
     } catch (error) {
-        console.error("Error sending email:", error);
+        console.error("Brevo error:", error);
         throw error;
     }
 };
@@ -34,6 +38,7 @@ const sendTicketResolvedEmail = async ({
     subject,
     resolutionNote
 }) => {
+
     const emailSubject = `SupportFlow Ticket Resolved - ${ticketNumber}`;
 
     const text = `
@@ -82,7 +87,12 @@ SupportFlow Team
         </div>
     `;
 
-    await sendEmail(to, emailSubject, text, html);
+    await sendEmail(
+        to,
+        emailSubject,
+        text,
+        html
+    );
 };
 
 export {
