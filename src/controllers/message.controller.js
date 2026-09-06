@@ -89,6 +89,13 @@ export const createMessage = async (req, res) => {
             });
         }
 
+        if (ticket.status === "resolved") {
+            return res.status(403).json({
+                success: false,
+                message: "You cannot send messages on resolved tickets."
+            });
+        }
+
         // Check whether the logged-in user can send a message
         const userId = req.user.id;
         const userRole = req.user.role;

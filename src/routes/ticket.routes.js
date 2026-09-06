@@ -1,5 +1,5 @@
 import express from "express";
-import { createTicket,getAllTickets,getCustomerTickets ,getTicketById,    reviewAISuggestions,getAgentTickets, resolveTicket} from "../controllers/ticket.controller.js";
+import { createTicket,getAllTickets,getCustomerTickets ,getTicketById,    reviewAISuggestions,getAgentTickets, resolveTicket, reopenTicket} from "../controllers/ticket.controller.js";
 import { authenticate ,requireAdmin,requireAgent} from "../middlewares/auth.middleware.js";
 import { getTicketMessages,createMessage } from "../controllers/message.controller.js";
 
@@ -31,5 +31,11 @@ ticketRouter.patch(
     authenticate,
     requireAgent,
     resolveTicket
+);
+ticketRouter.patch(
+    "/:ticketId/reopen",
+    authenticate,
+    requireAgent,
+    reopenTicket
 );
 export default ticketRouter;

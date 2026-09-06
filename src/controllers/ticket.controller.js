@@ -5,7 +5,8 @@ import {
   getAllTicketsService,
   getCustomerTicketsService,
   getTicketByIdService,
-  resolveTicketService
+    resolveTicketService,
+    reopenTicketService
 } from "../services/ticket.service.js";
 
 import Ticket from "../models/ticket.model.js";
@@ -274,6 +275,29 @@ export const resolveTicket = async (req, res) => {
         return res.status(400).json({
             success: false,
             message: error.message || "Failed to resolve ticket."
+        });
+    }
+};
+
+export const reopenTicket = async (req, res) => {
+    try {
+        const { ticketId } = req.params;
+        const ticket = await reopenTicketService({
+            ticketId,
+            agentId: req.user.id
+        });
+
+        return res.status(200).json({
+            success: true,
+            message: "Ticket reopened successfully.",
+            ticket
+        });
+    } catch (error) {
+        console.error("Reopen Ticket Error:", error);
+
+        return res.status(400).json({
+            success: false,
+            message: error.message || "Failed to reopen ticket."
         });
     }
 };

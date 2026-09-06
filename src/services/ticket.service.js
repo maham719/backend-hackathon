@@ -202,3 +202,32 @@ export const resolveTicketService = async ({
 
     return ticket;
 };
+
+export const reopenTicketService = async ({ ticketId, agentId }) => {
+    const ticket = await Ticket.findOne({
+        _id: ticketId,
+        assignedAgent: agentId
+    })
+        .populate("customer", "username email")
+        .populate("assignedAgent", "username email");
+
+    if (!ticket) {
+        throw new Error("Ticket not found or not assigned to this agent.");
+    }
+
+    if (ticket.status !== "resolved") {
+        throw new Error("Only resolved tickets can be reopened.");
+    }
+
+    ticket.status = "open";
+    await ticket.save();
+
+    await Activity.create({
+        ticket: ticket._id,
+        type: "status_changed",
+        message: "Ticket reopened by agent",
+        performedBy: agentId
+    });
+
+    return ticket;
+};
